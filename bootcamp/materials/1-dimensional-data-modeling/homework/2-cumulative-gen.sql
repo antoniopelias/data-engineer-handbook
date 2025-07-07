@@ -1,21 +1,21 @@
 WITH last_year as (
     SELECT *
     FROM actors
-    WHERE year = 1971
+    WHERE year = 1972
 ),
 this_year as (
     SELECT *
     FROM actor_films
-    WHERE year = 1972
+    WHERE year = 1973
 )
 INSERT INTO actors
 SELECT 
     COALESCE(ly.actor, ty.actor) as actor,
     COALESCE(ly.actorid, ty.actorid) as actorid,
     COALESCE(ly.year + 1, ty.year) as year,
+    COALESCE(ly.films, ARRAY[]::film[]) ||
     CASE 
-        WHEN ly.films IS NULL THEN ARRAY_AGG(ROW(film, votes, rating, filmid)::film)
-        WHEN COUNT(ty.film) = 0 IS NULL THEN ly.films
+        WHEN COUNT(ty.film) = 0 THEN ARRAY[]::film[]
         ELSE ly.films || ARRAY_AGG(ROW(film, votes, rating, filmid)::film)
     END
     AS films,
@@ -28,11 +28,7 @@ SELECT
             ELSE 'bad'  
         END)::quality_class
     END AS quality_class,
-    CASE 
-        WHEN COUNT(ty.actor) = 0 THEN FALSE  
-        ELSE TRUE
-    END
-    AS is_active    
+    COUNT(ty.actor) > 0 AS is_active    
 FROM this_year ty FULL JOIN last_year ly
 ON ty.actorid = ly.actorid
 GROUP BY 
