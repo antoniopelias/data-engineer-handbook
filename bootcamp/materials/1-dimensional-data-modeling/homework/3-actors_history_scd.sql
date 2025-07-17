@@ -4,6 +4,7 @@ CREATE TABLE actors_history_scd (
     quality_class quality_class,
     is_active BOOLEAN,
     start_date INTEGER,
-    end_date INTEGER,
-    year INTEGER
+    end_date INTEGER
 );
+
+DROP TABLE actors_history_scd;
